@@ -82,6 +82,7 @@ jobs:
       env:
         ASSETS_DIR: dist
         TAG_NAME: ${{ github.ref }}
+        GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
       with:
         script: |
           console.log("environment", process.versions);
