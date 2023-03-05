@@ -59,18 +59,14 @@ def iterate_sequence_pickler(filename: str, id_tag: Optional[str]):
 
 class SequencePickler(object):
     def __init__(self,
-                 tmp_filename: Optional[os.PathLike] = None,
+                 filename: os.PathLike,
                  *,
                  protocol: Optional[int] = None,
                  compresslevel: Optional[int] = 1,
                  id_tag: Optional[str] = None) -> None:
-        if tmp_filename is None:
-            fd, tmp_filename = tempfile.mkstemp("sequence_pickler")
-            os.close(fd)
-
         self._state = State.INIT
         self._protocol = protocol
-        self._tmp_filename = tmp_filename
+        self._filename = filename
         self._compresslevel = compresslevel
         self._id_tag = id_tag
         self._fp: BinaryIO = None
@@ -82,7 +78,7 @@ class SequencePickler(object):
                 f"Invalid call of open in {self._state} state.")
 
         self._state = State.WRITING
-        self._fp = gzip.open(self._tmp_filename,
+        self._fp = gzip.open(self._filename,
                              "wb",
                              compresslevel=self._compresslevel)
         pickle.dump(self._id_tag, self._fp, protocol=self._protocol)
@@ -115,7 +111,7 @@ class SequencePickler(object):
                 f"Invalid call of __iter__ in {self._state} state.")
 
         self._state = State.WRITE_CLOSED
-        return iterate_sequence_pickler(self._tmp_filename, self._id_tag)
+        return iterate_sequence_pickler(self._filename, self._id_tag)
 
     def remove_file(self):
         if self._state not in (State.INIT, State.WRITE_CLOSED):
@@ -123,4 +119,4 @@ class SequencePickler(object):
                 f"Invalid call of remove_file in {self._state} state.")
 
         self._state = State.REMOVED
-        os.unlink(self._tmp_filename)
+        os.unlink(self._filename)

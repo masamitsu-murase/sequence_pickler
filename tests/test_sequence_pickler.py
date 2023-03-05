@@ -16,7 +16,8 @@ class Sample(NamedTuple):
 
 class TestSequencePickler(unittest.TestCase):
     def test_write_objects(self):
-        sp = SequencePickler()
+        filename = "tempfile.pickle.gz"
+        sp = SequencePickler(filename)
         with self.assertRaises(SequencePicklerError):
             sp.add(None)
 
@@ -59,9 +60,9 @@ class TestSequencePickler(unittest.TestCase):
             for item in added_items:
                 sp_write.add(item)
 
-        sp_read0 = SequencePickler(filename)
+        sp_read0 = sp_write
         items0 = []
-        sp_read1 = SequencePickler(filename)
+        sp_read1 = sp_write
         items1 = []
         sp_read2 = SequencePickler(filename)
         items2 = []
@@ -172,8 +173,44 @@ class TestSequencePickler(unittest.TestCase):
 
             mock_method.assert_called()
 
+    def test_empty_sp(self):
+        filename = "tempfile_large.pickle.gz"
+        sp = SequencePickler(filename)
+        with sp.open():
+            pass
+        for _ in sp:
+            self.assertTrue(False, "Loop should be skipped.")
+
+    def test_empty_sp_with_tag(self):
+        filename = "tempfile_large.pickle.gz"
+        sp = SequencePickler(filename, id_tag="tag")
+        with sp.open():
+            pass
+
+        sp = SequencePickler(filename, id_tag="tag")
+        for _ in sp:
+            self.assertTrue(False, "Loop should be skipped.")
+
+    def test_invalid_tag(self):
+        filename = "tempfile.pickle.gz"
+        sp = SequencePickler(filename, id_tag="tag")
+        with sp.open():
+            sp.add(1)
+        sp = SequencePickler(filename, id_tag="invalid tag")
+        with self.assertRaises(SequencePicklerError):
+            for _ in sp:
+                pass
+
+        sp = SequencePickler(filename, id_tag="tag")
+        with sp.open():
+            pass
+        sp = SequencePickler(filename, id_tag="invalid tag")
+        with self.assertRaises(SequencePicklerError):
+            for _ in sp:
+                pass
+
     def test_large_objects(self):
-        filename = "temp_sp.pickle.gz"
+        filename = "tempfile_large.pickle.gz"
         item_count = 128 * 1024
         seed = 1
 
