@@ -23,9 +23,9 @@ jobs:
     - name: "Disable git autoCRLF"
       run: git config --global core.autocrlf false
 
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
-    - uses: actions/setup-python@v2
+    - uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python_version }}
 
@@ -45,9 +45,9 @@ jobs:
     - name: "Disable git autoCRLF"
       run: git config --global core.autoCRLF false
 
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
-    - uses: actions/setup-python@v2
+    - uses: actions/setup-python@v4
 
     - name: Install dependencies
       run: pip install -e .
@@ -65,9 +65,9 @@ jobs:
     - name: "Disable git autoCRLF"
       run: git config --global core.autoCRLF false
 
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
-    - uses: actions/setup-python@v2
+    - uses: actions/setup-python@v4
 
     - name: Install dependencies
       run: pip install -e .[package]
@@ -75,32 +75,31 @@ jobs:
     - name: Create wheel package
       run: python setup.py bdist_wheel
 
-    - name: Create Release
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
-        body: Release ${{ github.ref }}
-        draft: true
-        prerelease: false
-
     - run: ls -alF dist
 
     - name: Upload all artifacts
       uses: actions/github-script@v6
       env:
-        RELEASE_ID: ${{ steps.create_release.outputs.id }}
         ASSETS_DIR: dist
+        TAG_NAME: ${{ github.ref }}
       with:
         script: |
           console.log("environment", process.versions);
           const fs = require("fs").promises;
           const path = require("path");
           const { repo: { owner, repo } } = context;
-          const release_id = process.env["RELEASE_ID"];
+          const tag_name = process.env["TAG_NAME"];
+
+          const response = await github.rest.repos.createRelease({
+            owner,
+            repo,
+            tag_name,
+            body: "Release " + tag_name,
+            draft: true,
+            prerelease: false,
+          });
+
+          const release_id = response.id;
           const assets_dir = process.env["ASSETS_DIR"];
 
           const files = await fs.readdir(assets_dir);
