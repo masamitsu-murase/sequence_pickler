@@ -60,7 +60,7 @@ jobs:
 
     needs: [test]
     runs-on: ubuntu-latest
-    permissions: read-all|write-all
+    permissions: write-all
 
     steps:
     - name: "Disable git autoCRLF"
@@ -99,6 +99,7 @@ jobs:
             draft: true,
             prerelease: false,
           });
+          console.log("response", response);
 
           const release_id = response.id;
           const assets_dir = process.env["ASSETS_DIR"];
