@@ -1,8 +1,10 @@
 from random import Random
 from sequence_pickler import SequencePickler, SequencePicklerError
+from sequence_pickler.sequence_pickler import SequencePicklerIter
 import string
 from typing import List, NamedTuple
 import unittest
+from unittest.mock import patch
 
 
 class Sample(NamedTuple):
@@ -94,6 +96,81 @@ class TestSequencePickler(unittest.TestCase):
             return {key: value}
         else:
             raise RuntimeError(f"Invalid num: {num}")
+
+    def test_close_called_in_normal_case(self):
+        filename = "tempfile.pickle.gz"
+
+        close_org = SequencePicklerIter.close
+        with patch.object(SequencePicklerIter, 'close') as mock_method:
+            sp = SequencePickler(filename)
+
+            def side_effect():
+                close_org(sp)
+
+            mock_method.side_effect = side_effect
+
+            with sp.open():
+                item = 1
+                sp.add(item)
+                item = 2
+                sp.add(item)
+
+            for index, actual in enumerate(sp):
+                expected = index + 1
+                self.assertEqual(expected, actual)
+
+            mock_method.assert_called()
+
+    def test_close_called_when_breaked(self):
+        filename = "tempfile.pickle.gz"
+
+        close_org = SequencePicklerIter.close
+        with patch.object(SequencePicklerIter, 'close') as mock_method:
+            sp = SequencePickler(filename)
+
+            def side_effect():
+                close_org(sp)
+
+            mock_method.side_effect = side_effect
+
+            with sp.open():
+                item = 1
+                sp.add(item)
+                item = 2
+                sp.add(item)
+
+            for actual in sp:
+                expected = 1
+                self.assertEqual(expected, actual)
+                break
+
+            mock_method.assert_called()
+
+    def test_close_called_when_error_raised(self):
+        filename = "tempfile.pickle.gz"
+
+        close_org = SequencePicklerIter.close
+        with patch.object(SequencePicklerIter, 'close') as mock_method:
+            sp = SequencePickler(filename)
+
+            def side_effect():
+                close_org(sp)
+
+            mock_method.side_effect = side_effect
+
+            with sp.open():
+                item = 1
+                sp.add(item)
+                item = 2
+                sp.add(item)
+
+            with self.assertRaises(RuntimeError):
+                for actual in sp:
+                    expected = 1
+                    self.assertEqual(expected, actual)
+                    raise RuntimeError()
+
+            mock_method.assert_called()
 
     def test_large_objects(self):
         filename = "temp_sp.pickle.gz"

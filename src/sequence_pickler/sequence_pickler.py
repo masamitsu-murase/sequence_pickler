@@ -39,7 +39,7 @@ class SequencePicklerIter(object):
             obj = pickle.load(self._fp)
             return obj
         except EOFError:
-            self._fp.close()
+            self.close()
             raise StopIteration("End of file")
 
     def close(self):
@@ -62,7 +62,7 @@ class SequencePickler(object):
                  tmp_filename: Optional[os.PathLike] = None,
                  *,
                  protocol: Optional[int] = None,
-                 compresslevel: Optional[int] = 2,
+                 compresslevel: Optional[int] = 1,
                  id_tag: Optional[str] = None) -> None:
         if tmp_filename is None:
             fd, tmp_filename = tempfile.mkstemp("sequence_pickler")
