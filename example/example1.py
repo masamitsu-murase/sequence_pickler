@@ -67,6 +67,15 @@ for item in result:
     a = item
 end = time.perf_counter()
 print("In memory: Load: ", end - start)
+
+random_generator = Random(seed)
+start = time.perf_counter()
+for actual in result:
+    expected = generate_random_object(random_generator)
+    assert actual == expected
+end = time.perf_counter()
+print("In memory: Compare: ", end - start)
+
 sys.stdout.flush()
 subprocess.run(["ps", "-o", "pid,%cpu,rss,command", "-C", "python"])
 print("")
@@ -88,6 +97,15 @@ for item in sp:
     a = item
 end = time.perf_counter()
 print("SequencePickler: Load: ", end - start)
+
+random_generator = Random(seed)
+start = time.perf_counter()
+for actual in sp:
+    expected = generate_random_object(random_generator)
+    assert actual == expected
+end = time.perf_counter()
+print("In memory: Compare: ", end - start)
+
 sys.stdout.flush()
 subprocess.run(["ls", "-alFh", filename])
 print("")
