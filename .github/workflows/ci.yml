@@ -99,9 +99,8 @@ jobs:
             draft: true,
             prerelease: false,
           });
-          console.log("response", response);
 
-          const release_id = response.id;
+          const release_id = response.data.id;
           const assets_dir = process.env["ASSETS_DIR"];
 
           const files = await fs.readdir(assets_dir);
