@@ -66,7 +66,7 @@ for item in result:
     a = item
 end = time.perf_counter()
 print("In memory: Load: ", end - start)
-subprocess.run(["ps", "auxw", "python"])
+subprocess.run(["ps", "auxw", "-C", "python"])
 print("")
 result = None
 
