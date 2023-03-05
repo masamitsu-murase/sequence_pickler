@@ -2,6 +2,7 @@ from random import Random
 from sequence_pickler import SequencePickler
 import string
 import subprocess
+import sys
 import time
 from typing import List, NamedTuple
 
@@ -66,7 +67,8 @@ for item in result:
     a = item
 end = time.perf_counter()
 print("In memory: Load: ", end - start)
-subprocess.run(["ps", "auxw", "-C", "python"])
+sys.stdout.flush()
+subprocess.run(["ps", "-o", "pid,%cpu,rss,command", "-C", "python"])
 print("")
 result = None
 
@@ -86,5 +88,6 @@ for item in sp:
     a = item
 end = time.perf_counter()
 print("SequencePickler: Load: ", end - start)
+sys.stdout.flush()
 subprocess.run(["ls", "-alFh", filename])
 print("")
