@@ -9,7 +9,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='sequence_pickler',
-    version='1.0.4',
+    version='1.0.5',
     description='A library to save a sequence and load it later.',
     long_description=long_description,
     long_description_content_type='text/markdown',
