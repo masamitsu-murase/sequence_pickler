@@ -60,6 +60,7 @@ jobs:
 
     needs: [test]
     runs-on: ubuntu-latest
+    permissions: write-all
 
     steps:
     - name: "Disable git autoCRLF"
@@ -82,7 +83,6 @@ jobs:
       env:
         ASSETS_DIR: dist
         TAG_NAME: ${{ github.ref }}
-        GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
       with:
         script: |
           console.log("environment", process.versions);
