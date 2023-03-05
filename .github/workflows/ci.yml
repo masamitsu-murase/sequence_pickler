@@ -60,7 +60,7 @@ jobs:
 
     needs: [test]
     runs-on: ubuntu-latest
-    permissions: write-all
+    permissions: read-all|write-all
 
     steps:
     - name: "Disable git autoCRLF"
